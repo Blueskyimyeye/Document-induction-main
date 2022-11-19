@@ -1,0 +1,74 @@
+# fk--文件创建文件夹并存入文件
+import os
+import shutil
+import os
+import shutil
+import xlrd
+from xlutils.copy import copy
+import time
+
+#今日日期，归纳获取日期，格式 2022.01.01
+time_riqi = time.strftime('%Y.%m.%d',time.localtime(time.time()))
+print('今日日期：',time_riqi)
+
+#文件路径
+path_1 = r'*************************************'             #已发送文件地址
+path_2 = r'*************************************'          #归档文件地址
+path_3 = r'*************************************'                                          #已反馈文件地址
+path_4 = r'*************************************'
+
+#文件目录读取
+filelist = os.listdir(path_1)                #已发送文件目录读取
+filelist_1 = list(os.listdir(path_3))        #已发送文件转化为列表
+
+# 手动输入要归档的期号
+#file_filing_num = list(map(str, input('要归档的期号：\n').split(',')))
+
+#文件夹归档的期号读取为列表
+file_filing = []     #file_filing：文件归档
+for each in filelist_1:
+    each = str(each)
+    file_filing.append(each[0:3])
+print('要归纳的期号：', file_filing)
+
+file_filing_num = file_filing          #file_filing：文件归档名
+
+
+#文件复制移动
+for each in filelist:            #已发送文件读取所有期号
+    s_num = str(each[7:10])                   #文档期号
+    if s_num in file_filing_num:             #已发送文件期号如果在要归纳的期号列表中
+#       print(each)
+        name = each.split('.')         #要归纳期号的文档对应的文件名，（分列，第一列文件名，第二列文件后缀名）
+        print(name[0])                 #打印要归纳期号的文档对应的文件名
+        newfile_name = path_2 + '/' + str(name[0])              #在归档文件地址要归纳期号的文档名
+#       print(name)
+        if not os.path.exists(newfile_name):                #判断在归档文件地址是否已经存在归纳期号的文档名文件夹
+            os.mkdir(newfile_name)                   #完成反馈创建所属文件夹
+
+        oldfile_name = path_1 + '/' + each
+
+        oldfile_name_1 = path_3 + '/' + filelist_1[file_filing_num.index(s_num)]
+
+        shutil.copy(oldfile_name, newfile_name)  # oldfile_name: 代表源文件路径的字符串。newfile_name: 代表目标目录路径的字符串。   复制文件
+        shutil.move(oldfile_name_1, newfile_name)  # oldfile_name: 代表源文件路径的字符串。newfile_name: 代表目标目录路径的字符串。   移动文件
+        # shutil.move(old, newfile_name)  # old: 代表源文件路径的字符串。new: 代表目标目录路径的字符串。
+
+#Excel写入反馈
+Workbook = xlrd.open_workbook(path_4)    #打开要写入的文件excel,path_4路径的文件
+Sheet_Names = Workbook.sheet_by_name('sheet名字')           #打开要写入的文件excel下的sheet工作表,path_4路径的文件
+
+nrows = Sheet_Names.nrows  #sheet工作表行数
+ncols = Sheet_Names.ncols    #sheet工作表列数
+
+Issue_No = Sheet_Names.col_values(0)      #今年发送的文档期号
+Issue_No = Issue_No[1::]          #今年发送的文档期号，去掉第一行列名
+for i in range(len(Issue_No)):
+    Issue_No[i] = int(Issue_No[i])    #今年发送的文档期号转为int型
+workbook = copy(Workbook)             #文件excel重写打开
+Sheet_Names_write = workbook.get_sheet(0)             #文件excel重写打开第一个表sheet
+file_filing = [int(x) for x in file_filing]          #file_filing：文件归档名格式转换
+for each in file_filing:
+    if each in Issue_No:
+        Sheet_Names_write.write(each, 7, time_riqi)
+        workbook.save(path_4)

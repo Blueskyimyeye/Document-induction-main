@@ -1,0 +1,37 @@
+# fk--文件创建文件夹并存入文件
+import os
+import shutil
+import xlrd
+import xlwt
+from xlutils.copy import copy
+
+import time
+time_riqi = time.strftime('%Y.%m.%d',time.localtime(time.time()))
+print(time_riqi)
+
+
+path_1 = r'**********************************'             #已发送文件地址
+path_2 = r'**********************************'          #归档文件地址
+path_3 = r'**********************************'                                          #已反馈文件地址
+filelist = os.listdir(path_1)                #已发送文件目录读取
+for each in filelist:            #已发送文件读取所有期号
+    name = each.split('于')
+    name2 = name[1].split('的情况')
+    print(name2[0])
+    Workbook = xlrd.open_workbook(path_2)
+    Sheet_Names = Workbook.sheet_by_name('sheet名')
+    nrows = Sheet_Names.nrows  #行
+    #print(nrows)
+    ncols = Sheet_Names.ncols    #列
+    ss = nrows-1
+    #print (Issue_No)
+    Sheet_Names_xuhao1 = int(Sheet_Names.cell(ss,0).value)+1
+    Sheet_Names_xuhao2 = int(Sheet_Names.cell(ss, 2).value)+1
+    workbook = copy(Workbook)
+    name3 = workbook.get_sheet(0)
+    name3.write(nrows,0,Sheet_Names_xuhao1)
+    name3.write(nrows,1,name2[0])
+    name3.write(nrows,2,Sheet_Names_xuhao2)
+    name3.write(nrows,4,time_riqi)
+    workbook.save(path_2)
+
